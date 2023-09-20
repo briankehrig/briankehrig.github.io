@@ -8,3 +8,4 @@ layout: default
 # Explore the site
 
 - [Twin Peaks]({% link twinpeaks.md %}), a mathematical curiosity involving prime numbers
+- [Primes in Centuries]({% link primecenturies.md %}), attempting to find instances of centuries that contain unusually large numbers of primes
