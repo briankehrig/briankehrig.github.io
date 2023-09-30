@@ -4,41 +4,10 @@ title: "Primes in Centuries"
 permalink: /primecenturies
 ---
 
-# Twin peaks
-Prime numbers decrease in density as you go along the number line. There are 25 prime numbers below 100, and 21 of them between 100 and 200. However, the third century 200-300 only has 16 primes. From there, the numbers continue to fall:
-```
-0-100: 25 primes
-100-200: 21 primes
-200-300: 16 primes
-300-400: 16 primes
-400-500: 17 primes
-500-600: 14 primes
-600-700: 16 primes
-700-800: 14 primes
-800-900: 15 primes
-900-1000: 14 primes
-1000-1100: 16 primes
-1100-1200: 12 primes
-1200-1300: 15 primes
-1300-1400: 11 primes
-1400-1500: 17 primes
-1500-1600: 12 primes
-1600-1700: 15 primes
-1700-1800: 12 primes
-1800-1900: 12 primes
-1900-2000: 13 primes
-2000-2100: 14 primes
-2100-2200: 10 primes
-2200-2300: 15 primes
-2300-2400: 15 primes
-2400-2500: 10 primes
-2500-2600: 11 primes
-2600-2700: 15 primes
-2700-2800: 14 primes
-2800-2900: 12 primes
-2900-3000: 11 primes
-```
-(TODO: ADD GRAPH)
+# Prime Centuries
+Prime numbers decrease in density as you go along the number line. There are 25 prime numbers below 100, and 21 of them between 100 and 200. However, the third century 200-300 only has 16 primes. From there, the numbers continue to fall, at least on average, but there are sudden jumps up and down:
+
+![asdftest](/docs/assets/first_100_centuries_graph.png)
 
 If you continue checking centuries and calculate how many primes they contain, you might notice that other than the first two, there doesn't appear to be any centuries that have any more than 17 primes. It doesn't *always* decrease, there are some jumps up and down. There are 11 primes between 1300 and 1400, but the next century has a whopping 17 primes! However, you could check the centuries up to 1,000,000,000,000, and not find a single one with more than 17 primes. So is that the limit?
 
@@ -88,35 +57,35 @@ Using my laptop's GPU, it would take around 1.6 million years to exhaustively ch
 
 
 # How do I test for primes in centuries?
-Each century contains a specific "prime pattern". Let's consider the century 1300-1400, which contains the 11 primes 1301,1303,1307,1319,1321,1327,1361,1367,1373,1381,1399. The prime pattern for this century is (01,03,07,19,21,27,61,67,73,81,99), consisting of the last two digits of each prime.
+Each century contains a specific "prime pattern". For example, take the 14th century, which contains the 11 primes 1301,1303,1307,1319,1321,1327,1361,1367,1373,1381,1399. The prime pattern for this century is (01,03,07,19,21,27,61,67,73,81,99), consisting of the last two digits of each prime.
 
-Given a specific number of primes in a century, in this case 11, it is possible to enumerate all the possible prime patterns that contain exactly that many primes. For the case of 11 primes, there are a total of 24942742 patterns. The amount of patterns for other prime counts are listed below:
+Given a specific number of primes in a century, in this case 11, it is possible to enumerate all the possible prime patterns that contain exactly that many primes. For the case of 11 primes, there are a total of 24942742 patterns. The amount of patterns for other prime counts are listed below: [A261571](https://oeis.org/A261571)
 ```
 Primes  Patterns
-0		1
-1		40
-2		780
-3		7528
-4		47878
-5		225044
-6		830270
-7		2459376
-8		5900602
-9		11555200
-10		18634704
-11		24942742
-12		27836859
-13		25913910
-14		20053913
-15		12815608
-16		6699888
-17		2829786
-18		948729
-19		245756
-20		47150
-21		6276
-22		518
-23		20
+0	1
+1	40
+2	780
+3	7528
+4	47878
+5	225044
+6	830270
+7	2459376
+8	5900602
+9	11555200
+10	18634704
+11	24942742
+12	27836859
+13	25913910
+14	20053913
+15	12815608
+16	6699888
+17	2829786
+18	948729
+19	245756
+20	47150
+21	6276
+22	518
+23	20
 
 ```
 
@@ -128,7 +97,14 @@ How do we use prime patterns to increase our search efficiency? Well, it turns o
 
 To illustrate this, let's suppose we want to make a program that can efficiently test for prime quadruplets. A prime quadruplet is a sequence of four primes that are as close together as four primes can ever get (excluding very small primes like 2,3,5). The smallest prime quadruplets are (11, 13, 17, 19), (101, 103, 107, 109), (191, 193, 197, 199), and (821, 823, 827, 829). In all of these cases, the difference between the first and last prime in the quadruplet is 8, the smallest value possible. In general, a prime quadruplet must be of the form (n, n+2, n+6, n+8) for some n.
 
-If we want to search for primes n such that (n, n+2, n+6, n+8) are all prime, the obvious place to start is to only consider odd n, since even n will never be prime (again, we can ignore "very small" primes like 2). n cannot be divisible by 3 for the same reason, but n also cannot be 1 more than a multiple of 3, because then n+2 would be divisible by 3. Thus, n *must* be 1 less than a multiple of 3.
+A naive approach would look something like this:
+```
+for each integer n:
+    test if n, n+2, n+6, and n+8 are all prime
+    if they are, print n
+```
+
+If we want to optimize this program, the obvious place to start is to only consider odd n, since even n will never be prime (again, we can ignore "very small" primes like 2). n cannot be divisible by 3 for the same reason, but n also cannot be 1 more than a multiple of 3, because then n+2 would be divisible by 3. Thus, n *must* be 1 less than a multiple of 3.
 
 What about divisibility by 5? There are 5 possible residues when n is divided by 5, and it turns out that 4 of them cause one of (n, n+2, n+6, n+8) to be divisible by 5, and thus block a prime quadruplet from existing there. The only residue that works is when n is 1 more than a multiple of 5.
 
@@ -148,3 +124,32 @@ Proportion of modulos that "work" = 17506125/6469693230 =~ 1/369.5674
 Our program is now 370 times faster than it started. At this point, we start to see diminishing returns. Adding another prime, 31, will only speed it up by a factor of 31/27 = 1.15x, but now we will need to store 27x as many residues (472 million) instead of just 17.5 million. Memory very quickly becomes the limiting factor.
 
 One small issue is that when we generate the big list of modulos for the first time, it will be in a completely random order. We should sort the list, so that when we iterate over it, we will be guaranteed to find the prime quadruplets in the correct order.
+
+## Calculating larger prime patterns
+
+If we want to calculate much larger prime patterns, then the above method becomes extremely efficient. Let's suppose we want to search for the prime pattern that corresponds to the first century with 19 primes: (1,3,7,9,21,31,37,39,43,49,51,63,67,69,73,79,81,87,93). If we do the calculations, here is what we get:
+```
+Prime | Modulos that "work" | Total Modulos     | Speedup Factor
+2     | 1                   | 1                 | 2
+3     | 1                   | 1                 | 6
+5     | 1                   | 1                 | 30
+7     | 1                   | 1                 | 210
+11    | 1                   | 1                 | 2310
+13    | 1                   | 1                 | 30030
+17    | 2                   | 2                 | 255255
+19    | 5                   | 10                | 969969
+23    | 7                   | 70                | 3187041
+29    | 12                  | 840               | 7702016
+31    | 15                  | 12600             | 15917499
+37    | 19                  | 239400            | 30997235
+41    | 22                  | 5266800           | 57767575
+43    | 26                  | 136936800         | 95538682
+47    | 28                  | 3834230400        | 160368501
+53    | 34                  | 130363833600      | 249986193
+59    | 40                  | 5214553344000     | 368729635
+61    | 42                  | 219011240448000   | 535535898
+67    | 48                  | 10512539541504000 | 747518858
+```
+If we limit ourselves to, say, 1 billion entries in the list of modulos, then we can go as high as p=43 in the above list, which corresponds to a speedup of nearly 100 million times. If we run 10 billion iterations per second with a GPU, then we can search a range of 10^18 in just one second!
+
+Now, if we want to find centuries with exactly 19 primes, we have an efficient method to do it. We can just use the above method for all of the 245756 prime patterns (for 19 primes in a century). However, there's one important thing to note - we are not currently doing anything to force the program to search only within one century. For example, there are 19 primes between 220 and 320, and this fact would be found by our program, but we don't care about these ones, we only care about ones that fall exactly on a century. Therefore, we can make our search an additional 10x more efficient by only considering modulos that fall exactly on a century.
